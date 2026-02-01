@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dream Tech - Strict Size Tool</title>
+    <title>Dream Tech - Final Strict Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -30,6 +30,8 @@
         /* Cropper Customization */
         .cropper-view-box, .cropper-face { outline-color: #2563eb; }
         .cropper-line, .cropper-point { background-color: #2563eb; }
+        /* Hide background grid for cleaner look */
+        .cropper-modal { background-color: #000; opacity: 0.8; }
         
         /* Loader */
         .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-left: 8px; }
@@ -76,8 +78,8 @@
                         <div class="h-64 bg-black border border-gray-700 overflow-hidden relative">
                             <img id="img-nsdl-photo" class="max-w-full">
                         </div>
-                        <button id="btn-nsdl-photo" onclick="downloadStrict('nsdl-photo', 295, 413)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
-                            Download (49 KB) <span class="spinner hidden"></span>
+                        <button id="btn-nsdl-photo" onclick="downloadStrict('nsdl-photo', 295, 413, false)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
                         </button>
                     </div>
                 </div>
@@ -97,8 +99,8 @@
                         <div class="h-64 bg-black border border-gray-700 overflow-hidden relative">
                             <img id="img-nsdl-sig" class="max-w-full">
                         </div>
-                        <button id="btn-nsdl-sig" onclick="downloadStrict('nsdl-sig', 531, 236)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
-                            Download (49 KB) <span class="spinner hidden"></span>
+                        <button id="btn-nsdl-sig" onclick="downloadStrict('nsdl-sig', 531, 236, true)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
                         </button>
                     </div>
                 </div>
@@ -106,12 +108,12 @@
 
             <div class="card p-6 border-red-900/30">
                 <div class="absolute top-0 right-0 bg-red-900/40 text-red-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-red-900">
-                    STRICT 298 KB
+                    STRICT 298 KB LOCK
                 </div>
                 <div class="flex items-center gap-3 mb-2">
                     <h3 class="text-xl font-bold text-red-500">📄 Ultimate PDF Tool</h3>
                 </div>
-                <p class="text-gray-500 text-sm mb-4">Upload PDF, JPG, or PNG -> Output 298KB PDF</p>
+                <p class="text-gray-500 text-sm mb-4">Upload PDF, JPG, or PNG</p>
 
                 <div class="drop-zone rounded p-6 flex flex-col items-center justify-center text-center relative" id="drop-pdf">
                     <input type="file" id="pdf-file" accept=".pdf, image/png, image/jpeg, image/jpg" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handleFileSelect()">
@@ -120,7 +122,7 @@
                 </div>
 
                 <button id="btn-pdf" onclick="processUnifiedPDF()" class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded font-bold flex items-center justify-center gap-2">
-                    DOWNLOAD PDF (298 KB) <span id="spinner-pdf" class="spinner hidden"></span>
+                    Download PDF <span id="spinner-pdf" class="spinner hidden"></span>
                 </button>
                 <div id="pdf-msg" class="mt-3 text-center text-xs font-mono text-gray-500"></div>
             </div>
@@ -143,8 +145,8 @@
 
                     <div id="wrap-uti-photo" class="hidden">
                         <div class="h-64 bg-black overflow-hidden"><img id="img-uti-photo"></div>
-                        <button id="btn-uti-photo" onclick="downloadStrict('uti-photo', 213, 213)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">
-                            Download (49 KB) <span class="spinner hidden"></span>
+                        <button id="btn-uti-photo" onclick="downloadStrict('uti-photo', 213, 213, false)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
                         </button>
                     </div>
                 </div>
@@ -162,8 +164,8 @@
 
                     <div id="wrap-uti-sig" class="hidden">
                         <div class="h-64 bg-black overflow-hidden"><img id="img-uti-sig"></div>
-                        <button id="btn-uti-sig" onclick="downloadStrict('uti-sig', 400, 200)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">
-                            Download (49 KB) <span class="spinner hidden"></span>
+                        <button id="btn-uti-sig" onclick="downloadStrict('uti-sig', 400, 200, true)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
                         </button>
                     </div>
                 </div>
@@ -217,7 +219,7 @@
             }
         }
 
-        // --- 2. CROPPER LOGIC ---
+        // --- 2. CROPPER LOGIC (Fixed White Border) ---
         function initCropper(input, ratio, id) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -227,7 +229,12 @@
                     img.src = e.target.result;
                     document.getElementById('wrap-' + id).classList.remove('hidden');
                     croppers[id] = new Cropper(img, {
-                        aspectRatio: ratio, viewMode: 1, dragMode: 'move', autoCropArea: 0.9, background: false, guides: true,
+                        aspectRatio: ratio, 
+                        viewMode: 1, // STRICT MODE: Prevents crop box from going outside image
+                        dragMode: 'move', 
+                        autoCropArea: 0.9, 
+                        background: false, 
+                        guides: true,
                     });
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -235,7 +242,7 @@
         }
 
         // --- 3. STRICT 49KB IMAGE LOGIC ---
-        async function downloadStrict(id, baseWidth, baseHeight) {
+        async function downloadStrict(id, baseWidth, baseHeight, isSignature) {
             if (!croppers[id]) return;
 
             const btn = document.getElementById('btn-' + id);
@@ -243,9 +250,25 @@
             btn.disabled = true;
             spinner.classList.remove('hidden');
 
+            // FIX: Removed fillColor for photos to avoid white borders
+            // Only use white background for signatures (transparency handling)
+            const cropOpts = {
+                width: baseWidth, 
+                height: baseHeight, 
+                imageSmoothingEnabled: true, 
+                imageSmoothingQuality: 'high'
+            };
+            
+            if (isSignature) {
+                cropOpts.fillColor = '#fff';
+            }
+
             const getBlob = (w, h, q) => {
                 return new Promise(resolve => {
-                    const canvas = croppers[id].getCroppedCanvas({ width: w, height: h, fillColor: '#fff', imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+                    // Update dimensions dynamically
+                    cropOpts.width = w;
+                    cropOpts.height = h;
+                    const canvas = croppers[id].getCroppedCanvas(cropOpts);
                     canvas.toBlob(blob => resolve(blob), 'image/jpeg', q);
                 });
             };
@@ -259,9 +282,7 @@
                 let quality = 0.95;
                 let blob = null;
 
-                // Step 1: Force Upscale to ensure we CAN reach 49KB
-                // If we don't scale up small images, 100% quality might still be 20KB
-                // Start with a heavy 3x scale
+                // Heavy upscale start to ensure we hit the file size
                 scale = 3.0; 
                 
                 let attempts = 0;
@@ -269,20 +290,18 @@
                     blob = await getBlob(baseWidth * scale, baseHeight * scale, quality);
                     
                     if (blob.size >= minBytes && blob.size <= maxBytes) {
-                        break; // Perfect Hit
+                        break; 
                     }
 
                     if (blob.size > maxBytes) {
-                        // Too big
                         if (quality > 0.1) quality -= 0.02;
-                        else scale -= 0.1; // Reduce resolution if quality bottoms out
+                        else scale -= 0.1;
                     } else {
-                        // Too small
                         if (quality < 1.0) quality += 0.02;
-                        else scale += 0.2; // Increase resolution if quality maxes out
+                        else scale += 0.2;
                     }
 
-                    // Safety
+                    // Strict clamps
                     if (scale < 0.5) scale = 0.5;
                     if (scale > 10) scale = 10;
                     if (quality < 0.05) quality = 0.05;
@@ -293,7 +312,7 @@
 
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `${id}_49KB.jpg`;
+                link.download = `${id}_Strict.jpg`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -306,7 +325,7 @@
             }
         }
 
-        // --- 4. STRICT 298KB UNIFIED PDF LOGIC ---
+        // --- 4. STRICT 298KB PDF LOCK (NO EXCEPTIONS) ---
         async function processUnifiedPDF() {
             const fileInput = document.getElementById('pdf-file');
             const status = document.getElementById('pdf-msg');
@@ -321,21 +340,19 @@
 
             btn.disabled = true;
             spinner.classList.remove('hidden');
-            status.innerText = "Processing to Exact 298KB...";
+            status.innerText = "Processing (Locked Max 298KB)...";
             status.className = "mt-3 text-center text-xs font-mono text-blue-400";
 
             try {
                 const file = fileInput.files[0];
                 const { jsPDF } = window.jspdf;
                 
-                // --- Helper: Generate PDF Blob at specific settings ---
                 const generatePdfBlob = async (targetScale, jpgQuality) => {
                     const newPdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
                     const pageWidth = 210;
                     const pageHeight = 297;
 
                     if (file.type === 'application/pdf') {
-                        // Handle PDF Input
                         const arrayBuffer = await file.arrayBuffer();
                         const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
                         
@@ -356,78 +373,70 @@
                             newPdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
                         }
                     } else {
-                        // Handle Image Input (JPG/PNG)
                         const img = new Image();
                         img.src = URL.createObjectURL(file);
                         await new Promise(r => img.onload = r);
-
                         const canvas = document.createElement('canvas');
-                        // Calculate Aspect Ratio to fit A4
                         const aspect = img.width / img.height;
-                        
-                        // Set canvas dimensions based on scale
                         canvas.width = 1240 * targetScale;
                         canvas.height = canvas.width / aspect;
-
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        
                         const imgData = canvas.toDataURL('image/jpeg', jpgQuality);
-                        
-                        // Fit image on A4 logic
                         const imgProps = newPdf.getImageProperties(imgData);
                         const pdfWidth = newPdf.internal.pageSize.getWidth();
                         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                        
                         newPdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
                     }
-                    
                     return newPdf.output('blob');
                 };
 
-                // --- ITERATIVE SIZE LOCK (Target: 295KB - 298KB) ---
-                const minTarget = 295 * 1024;
-                const maxTarget = 298 * 1024;
+                // --- HARD LIMIT LOGIC (MAX 298KB) ---
+                const maxTarget = 298 * 1024; // Absolute Ceiling
                 
                 let scale = 1.0;
                 let quality = 0.8;
                 let finalBlob = null;
                 
-                // Initial Attempt
-                finalBlob = await generatePdfBlob(scale, quality);
-
                 let attempts = 0;
-                while (attempts < 15) { // Try up to 15 times
-                    const size = finalBlob.size;
-                    
-                    if (size >= minTarget && size <= maxTarget) {
-                        break; // Success!
-                    }
-
-                    if (size > maxTarget) {
-                        // Too Big: Reduce Quality first, then Scale
-                        if (quality > 0.3) quality -= 0.05;
-                        else scale -= 0.1;
-                    } else {
-                        // Too Small: Increase Scale first, then Quality
-                        // If file is very small, we need massive scale up
-                        if (quality < 0.9) quality += 0.05;
-                        else scale += 0.3;
-                    }
-                    
-                    // Clamps
-                    if (quality < 0.1) quality = 0.1;
-                    if (quality > 1.0) quality = 1.0;
-                    if (scale < 0.5) scale = 0.5;
-                    
+                while (attempts < 20) {
                     finalBlob = await generatePdfBlob(scale, quality);
+                    const size = finalBlob.size;
+
+                    // If we are strictly under 298KB
+                    if (size <= maxTarget) {
+                        // Check if it's too small (under 280KB) and we have room to improve
+                        if (size < 280 * 1024 && quality < 0.95) {
+                            quality += 0.05; // Try to improve quality
+                            scale += 0.1;
+                        } else {
+                            break; // Perfect or Good Enough
+                        }
+                    } else {
+                        // If OVER 298KB -> AGGRESSIVELY REDUCE
+                        if (size > 500 * 1024) {
+                            quality -= 0.15; // Big drop
+                            scale -= 0.2;
+                        } else {
+                            quality -= 0.05; // Small drop
+                            scale -= 0.1;
+                        }
+                    }
+                    
+                    if (quality < 0.1) quality = 0.1;
+                    if (scale < 0.4) scale = 0.4;
                     attempts++;
                 }
 
-                // Download
+                // EMERGENCY FINAL CHECK
+                // If after all attempts it is STILL > 298KB, we force a low-res version
+                if (finalBlob.size > maxTarget) {
+                    finalBlob = await generatePdfBlob(0.5, 0.3);
+                }
+
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(finalBlob);
-                link.download = `Document_298KB.pdf`;
+                link.download = `Document_Strict.pdf`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
