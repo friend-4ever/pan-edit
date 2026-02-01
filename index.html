@@ -32,7 +32,7 @@
         .cropper-line, .cropper-point { background-color: #2563eb; }
         
         /* Loader */
-        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-left: 8px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -63,7 +63,7 @@
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="card p-5">
                     <div class="absolute top-0 right-0 bg-blue-900/40 text-blue-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-blue-900">
-                        2.5cm x 3.5cm | 300 DPI
+                        2.5cm x 3.5cm | 45-50KB
                     </div>
                     <h3 class="text-lg font-bold text-gray-200 mb-4">👤 Photo Crop</h3>
                     
@@ -76,15 +76,15 @@
                         <div class="h-64 bg-black border border-gray-700 overflow-hidden relative">
                             <img id="img-nsdl-photo" class="max-w-full">
                         </div>
-                        <button onclick="downloadSmart('nsdl-photo', 295, 413, 45, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
-                            Download
+                        <button id="btn-nsdl-photo" onclick="downloadSmart('nsdl-photo', 295, 413, 45, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
                         </button>
                     </div>
                 </div>
 
                 <div class="card p-5">
                     <div class="absolute top-0 right-0 bg-blue-900/40 text-blue-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-blue-900">
-                        4.5cm x 2.0cm | 300 DPI
+                        4.5cm x 2.0cm | 45-50KB
                     </div>
                     <h3 class="text-lg font-bold text-gray-200 mb-4">✍️ Signature Crop</h3>
                     
@@ -97,8 +97,8 @@
                         <div class="h-64 bg-black border border-gray-700 overflow-hidden relative">
                             <img id="img-nsdl-sig" class="max-w-full">
                         </div>
-                        <button onclick="downloadSmart('nsdl-sig', 531, 236, 45, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
-                            Download
+                        <button id="btn-nsdl-sig" onclick="downloadSmart('nsdl-sig', 531, 236, 45, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
                         </button>
                     </div>
                 </div>
@@ -106,12 +106,12 @@
 
             <div class="card p-6 border-red-900/30">
                 <div class="absolute top-0 right-0 bg-red-900/40 text-red-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-red-900">
-                    Max 300 KB
+                    Target: 290-300 KB
                 </div>
                 <div class="flex items-center gap-3 mb-2">
                     <h3 class="text-xl font-bold text-red-500">📄 PDF Compressor</h3>
                 </div>
-                <p class="text-gray-500 text-sm mb-4">High Quality (290KB - 300KB Target)</p>
+                <p class="text-gray-500 text-sm mb-4">High Quality (290KB - 300KB Strict Mode)</p>
 
                 <div class="drop-zone rounded p-6 flex flex-col items-center justify-center text-center relative" id="drop-pdf">
                     <input type="file" id="pdf-file" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handlePdfSelect()">
@@ -132,7 +132,7 @@
                 
                 <div class="card p-5 border-purple-900/30">
                     <div class="absolute top-0 right-0 bg-purple-900/40 text-purple-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-purple-900">
-                        213px x 213px
+                        High Res | 45-50KB
                     </div>
                     <h3 class="text-lg font-bold text-purple-400 mb-4">📷 Photo Crop</h3>
                     
@@ -143,13 +143,15 @@
 
                     <div id="wrap-uti-photo" class="hidden">
                         <div class="h-64 bg-black overflow-hidden"><img id="img-uti-photo"></div>
-                        <button onclick="downloadSmart('uti-photo', 213, 213, 45, 50)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">Download</button>
+                        <button id="btn-uti-photo" onclick="downloadSmart('uti-photo', 213, 213, 45, 50)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
+                        </button>
                     </div>
                 </div>
 
                 <div class="card p-5 border-purple-900/30">
                     <div class="absolute top-0 right-0 bg-purple-900/40 text-purple-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-purple-900">
-                        400px x 200px
+                        High Res | 45-50KB
                     </div>
                     <h3 class="text-lg font-bold text-purple-400 mb-4">✍️ Signature Crop</h3>
                     
@@ -160,7 +162,9 @@
 
                     <div id="wrap-uti-sig" class="hidden">
                         <div class="h-64 bg-black overflow-hidden"><img id="img-uti-sig"></div>
-                        <button onclick="downloadSmart('uti-sig', 400, 200, 45, 50)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">Download</button>
+                        <button id="btn-uti-sig" onclick="downloadSmart('uti-sig', 400, 200, 45, 50)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">
+                            Download <span class="spinner hidden"></span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -169,7 +173,7 @@
     </div>
 
     <script>
-        // Store multiple cropper instances to fix the "disappearing photo" bug
+        // Store multiple cropper instances
         const croppers = {};
 
         // --- 1. UI LOGIC & DRAG DROP ---
@@ -201,12 +205,9 @@
             el.addEventListener('drop', (e) => {
                 e.preventDefault();
                 el.classList.remove('dragover');
-                // The input handling is done via the file input inside, 
-                // but if dropped on div, we manually trigger input change if needed.
                 const input = el.querySelector('input');
                 if (e.dataTransfer.files.length) {
                     input.files = e.dataTransfer.files;
-                    // Manually trigger change event
                     const event = new Event('change');
                     input.dispatchEvent(event);
                 }
@@ -222,21 +223,16 @@
             }
         }
 
-        // --- 2. CROPPER LOGIC (Bug Fixed) ---
+        // --- 2. CROPPER LOGIC ---
         function initCropper(input, ratio, id) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    // Destroy existing cropper for THIS specific ID only
                     if (croppers[id]) croppers[id].destroy();
-                    
                     const img = document.getElementById('img-' + id);
                     img.src = e.target.result;
-                    
-                    // Show wrapper
                     document.getElementById('wrap-' + id).classList.remove('hidden');
-                    // Hide drop zone text temporarily to make it cleaner? No, keep it accessible.
-
+                    
                     croppers[id] = new Cropper(img, {
                         aspectRatio: ratio,
                         viewMode: 1,
@@ -250,76 +246,101 @@
             }
         }
 
-        // --- 3. INTELLIGENT IMAGE RESIZER (45KB - 50KB) ---
-        function downloadSmart(id, widthPx, heightPx, minKb, maxKb) {
+        // --- 3. INTELLIGENT IMAGE RESIZER (Smart 45-50KB Logic) ---
+        async function downloadSmart(id, baseWidth, baseHeight, minKb, maxKb) {
             if (!croppers[id]) return;
 
-            const canvas = croppers[id].getCroppedCanvas({
-                width: widthPx,
-                height: heightPx,
-                fillColor: '#fff',
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-            });
+            const btn = document.getElementById('btn-' + id);
+            const spinner = btn.querySelector('.spinner');
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
 
-            // Binary Search-like approach to find the perfect quality
-            let minQ = 0.5;
-            let maxQ = 1.0;
-            let bestBlob = null;
-            let bestSize = 0;
-            
-            // We run a quick loop to find a blob inside the range
-            // If the image at 1.0 quality is LESS than minKb, we just save at 1.0 (Can't make it bigger without padding)
-            // If the image at 0.1 quality is MORE than maxKb, we save at 0.1
-            
-            const checkQuality = (q) => {
+            // Helper to get blob at specific dimension and quality
+            const getBlob = (w, h, q) => {
                 return new Promise(resolve => {
+                    const canvas = croppers[id].getCroppedCanvas({
+                        width: w,
+                        height: h,
+                        fillColor: '#fff',
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high',
+                    });
                     canvas.toBlob(blob => resolve(blob), 'image/jpeg', q);
                 });
             };
 
-            const processDownload = async () => {
-                // 1. Check Max Quality
-                let blob = await checkQuality(1.0);
+            try {
+                // PHASE 1: Scale Up (Resolution Boost)
+                // If the file is too small even at max quality, we make the image bigger (more pixels)
+                // This is critical for UTI 213x213 which is normally too small for 50KB.
                 
-                // If even at max quality it's too small, just download it (High Quality is priority)
-                // But user insisted on range. To force size up is hard for JPEGs without adding noise.
-                // We will stick to 1.0 if it's small.
+                let scale = 1.0;
+                let currentBlob = null;
+                let currentQuality = 1.0;
                 
-                if (blob.size > maxKb * 1024) {
-                    // It's too big, we need to compress
-                    let attempts = 0;
-                    let currentQ = 0.9;
-                    
-                    while (attempts < 10) {
-                        blob = await checkQuality(currentQ);
-                        if (blob.size <= maxKb * 1024 && blob.size >= minKb * 1024) {
-                            break; // Perfect
-                        }
-                        if (blob.size > maxKb * 1024) {
-                            currentQ -= 0.05; // Reduce quality
-                        } else if (blob.size < minKb * 1024) {
-                            currentQ += 0.02; // Increase slightly
-                        }
-                        if (currentQ < 0.1) currentQ = 0.1;
-                        if (currentQ > 1.0) currentQ = 1.0;
-                        attempts++;
+                // Loop to increase resolution until we are at least above minKb (at 100% quality)
+                // We limit scale to 5x to avoid crashing browser with massive images
+                for (let s = 1.0; s <= 5.0; s += 0.5) {
+                    currentBlob = await getBlob(baseWidth * s, baseHeight * s, 1.0);
+                    if (currentBlob.size >= minKb * 1024) {
+                        scale = s;
+                        break; 
                     }
+                    scale = s; // Keep increasing if still too small
                 }
 
-                // Download Logic
+                // PHASE 2: Compress Down (Quality Tuning)
+                // Now that we have a big enough image, we lower quality slightly to fit in window
+                // Or if we overshot, we compress.
+                
+                let attempts = 0;
+                currentQuality = 0.95; // Start high
+                
+                while (attempts < 20) {
+                    currentBlob = await getBlob(baseWidth * scale, baseHeight * scale, currentQuality);
+                    const size = currentBlob.size;
+                    
+                    if (size >= minKb * 1024 && size <= maxKb * 1024) {
+                        // Perfect!
+                        break;
+                    }
+                    
+                    if (size > maxKb * 1024) {
+                        currentQuality -= 0.03; // Too big, lower quality
+                    } else {
+                        // Too small
+                        if (currentQuality >= 0.98) {
+                            // If we are already at max quality and still too small, force Scale Up slightly
+                            scale += 0.2; 
+                        } else {
+                            currentQuality += 0.02; // Boost quality
+                        }
+                    }
+                    
+                    // Safety clamps
+                    if (currentQuality < 0.1) currentQuality = 0.1;
+                    if (currentQuality > 1.0) currentQuality = 1.0;
+                    attempts++;
+                }
+
+                // Download
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `${id}_fixed.jpg`;
+                link.href = URL.createObjectURL(currentBlob);
+                link.download = `${id}_Corrected.jpg`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-            };
 
-            processDownload();
+            } catch (error) {
+                console.error(error);
+                alert("Error processing image.");
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
         }
 
-        // --- 4. SMART PDF COMPRESSOR (290KB - 300KB Target) ---
+        // --- 4. SMART PDF COMPRESSOR (Strict 290-300KB) ---
         async function compressPDF() {
             const fileInput = document.getElementById('pdf-file');
             const status = document.getElementById('pdf-msg');
@@ -334,7 +355,7 @@
 
             btn.disabled = true;
             spinner.classList.remove('hidden');
-            status.innerText = "Analyzing & Optimizing...";
+            status.innerText = "Processing (Strict 290-300KB Target)...";
             status.className = "mt-3 text-center text-xs font-mono text-blue-400";
 
             try {
@@ -343,23 +364,17 @@
                 const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
                 const { jsPDF } = window.jspdf;
 
-                // We try a standard compression first
-                // To get close to 300KB, we adjust the scale/DPI of the images put into the PDF
-                
-                // Target: A4
-                const pageWidth = 210; 
-                const pageHeight = 297; 
-
-                // We will try to generate the PDF with a specific image quality
-                const createPdfAtQuality = async (imgQuality, scaleFactor) => {
+                const createPdfAtQuality = async (scaleFactor, jpegQuality) => {
                     const newPdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
-                    
+                    const pageWidth = 210; 
+                    const pageHeight = 297; 
+
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
-                        // Scale factor determines resolution. 
-                        // 2.0 is usually high res. 1.0 is low.
                         let viewport = page.getViewport({ scale: 1.0 });
-                        const finalScale = (1240 * scaleFactor) / viewport.width; // Normalize width
+                        // Adjust resolution based on scaleFactor
+                        // 1.5 is standard crisp, 2.0 is high, 0.8 is draft
+                        const finalScale = (1240 * scaleFactor) / viewport.width; 
                         viewport = page.getViewport({ scale: finalScale });
 
                         const canvas = document.createElement('canvas');
@@ -368,36 +383,45 @@
                         const ctx = canvas.getContext('2d');
                         await page.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                        const imgData = canvas.toDataURL('image/jpeg', imgQuality);
+                        const imgData = canvas.toDataURL('image/jpeg', jpegQuality);
                         if (i > 1) newPdf.addPage();
                         newPdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
                     }
                     return newPdf;
                 };
 
-                // Strategy: Start with high quality. If > 300KB, reduce.
-                // It's hard to predict exact size, so we use a safe heuristic.
-                // 0.7 quality at approx 150DPI usually yields ~100-200KB per page. 
-                
-                // Run 1: High Quality Attempt
-                let finalDoc = await createPdfAtQuality(0.75, 1.2); 
-                let blob = finalDoc.output('blob');
+                // Iterative approach to hit 290-300KB
+                let scale = 1.0;
+                let q = 0.7;
+                let finalDoc = null;
+                let blob = null;
 
-                // If too big, retry with lower settings
-                if (blob.size > 300 * 1024) {
-                    status.innerText = "File too large, compressing harder...";
-                    finalDoc = await createPdfAtQuality(0.5, 1.0);
+                // Attempt 1: Standard
+                finalDoc = await createPdfAtQuality(scale, q); 
+                blob = finalDoc.output('blob');
+
+                // Adjust loop
+                let attempts = 0;
+                while (attempts < 3) {
+                    if (blob.size > 300 * 1024) {
+                        scale -= 0.2; // Reduce resolution
+                        q -= 0.1;     // Reduce quality
+                    } else if (blob.size < 290 * 1024) {
+                        scale += 0.2; // Increase resolution
+                        q += 0.1;     // Increase quality
+                    } else {
+                        break; // Perfect
+                    }
+                    if (q < 0.3) q = 0.3; 
+                    if (q > 1.0) q = 1.0;
+                    
+                    finalDoc = await createPdfAtQuality(scale, q);
                     blob = finalDoc.output('blob');
-                } else if (blob.size < 150 * 1024) {
-                    // If way too small, boost quality
-                    status.innerText = "Enhancing quality...";
-                    finalDoc = await createPdfAtQuality(0.9, 1.5);
-                    blob = finalDoc.output('blob');
+                    attempts++;
                 }
 
                 finalDoc.save("Optimized_Document.pdf");
-                
-                status.innerText = `Done! Size: ${(blob.size/1024).toFixed(1)} KB`;
+                status.innerText = `✅ Done! Size: ${(blob.size/1024).toFixed(1)} KB`;
                 status.className = "mt-3 text-center text-xs font-mono text-green-500";
 
             } catch (err) {
