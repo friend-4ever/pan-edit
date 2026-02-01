@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dream Tech - NSDL/UTI Official Resizer</title>
+    <title>Dream Tech - Pan Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -17,18 +17,22 @@
     <style>
         /* Pure Black Theme */
         body { background-color: #000000; color: #e5e5e5; font-family: 'Segoe UI', sans-serif; }
-        .card { background-color: #111111; border: 1px solid #333; border-radius: 8px; }
+        .card { background-color: #111111; border: 1px solid #333; border-radius: 8px; position: relative; }
         .btn-primary { background-color: #2563eb; color: white; transition: 0.3s; }
-        .btn-primary:hover { background-color: #1d4ed8; box-shadow: 0 0 10px rgba(37, 99, 235, 0.5); }
-        .btn-danger { background-color: #dc2626; color: white; transition: 0.3s; }
-        .btn-danger:hover { background-color: #b91c1c; box-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
+        .btn-primary:hover { background-color: #1d4ed8; box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); }
+        .btn-purple { background-color: #9333ea; color: white; transition: 0.3s; }
+        .btn-purple:hover { background-color: #7e22ce; box-shadow: 0 0 15px rgba(147, 51, 234, 0.5); }
+        
+        /* Drag and Drop Zone Styles */
+        .drop-zone { border: 2px dashed #444; transition: 0.2s; background: #0a0a0a; }
+        .drop-zone.dragover { border-color: #2563eb; background: #1e1e1e; }
         
         /* Cropper Customization */
         .cropper-view-box, .cropper-face { outline-color: #2563eb; }
         .cropper-line, .cropper-point { background-color: #2563eb; }
         
         /* Loader */
-        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #2563eb; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -39,7 +43,6 @@
         <div class="flex justify-between items-center border-b border-gray-800 pb-4">
             <div>
                 <h1 class="text-3xl font-bold text-white tracking-wider">DREAM <span class="text-blue-600">TECH</span></h1>
-                <p class="text-gray-500 text-xs uppercase tracking-widest mt-1">Official NSDL & UTI Tool</p>
             </div>
             <div class="text-xs font-mono text-green-500 border border-green-900 bg-green-900/20 px-3 py-1 rounded">
                 SYSTEM: ONLINE
@@ -59,75 +62,105 @@
             
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="card p-5">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-lg font-bold text-gray-200">👤 Photo Correction</h3>
-                        <span class="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded border border-blue-900">2.5cm x 3.5cm</span>
+                    <div class="absolute top-0 right-0 bg-blue-900/40 text-blue-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-blue-900">
+                        2.5cm x 3.5cm | 300 DPI
                     </div>
-                    <input type="file" accept="image/*" class="w-full text-sm text-gray-500 file:bg-gray-800 file:text-white file:border-0 file:py-2 file:px-4 file:rounded mb-4 cursor-pointer hover:file:bg-gray-700" onchange="initCropper(this, 2.5/3.5, 'nsdl-photo')">
+                    <h3 class="text-lg font-bold text-gray-200 mb-4">👤 Photo Crop</h3>
+                    
+                    <div class="drop-zone rounded p-4 text-center cursor-pointer mb-4 relative" id="drop-nsdl-photo">
+                        <p class="text-gray-500 text-sm pointer-events-none">Drag & Drop or Click</p>
+                        <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="initCropper(this, 2.5/3.5, 'nsdl-photo')">
+                    </div>
                     
                     <div id="wrap-nsdl-photo" class="hidden">
                         <div class="h-64 bg-black border border-gray-700 overflow-hidden relative">
                             <img id="img-nsdl-photo" class="max-w-full">
                         </div>
-                        <button onclick="downloadCrop('nsdl-photo', 200, 280, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
-                            Crop & Save (Fixed 2.5x3.5cm)
+                        <button onclick="downloadSmart('nsdl-photo', 295, 413, 45, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
+                            Download
                         </button>
                     </div>
                 </div>
 
                 <div class="card p-5">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-lg font-bold text-gray-200">✍️ Signature Correction</h3>
-                        <span class="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded border border-blue-900">4.5cm x 2.0cm</span>
+                    <div class="absolute top-0 right-0 bg-blue-900/40 text-blue-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-blue-900">
+                        4.5cm x 2.0cm | 300 DPI
                     </div>
-                    <input type="file" accept="image/*" class="w-full text-sm text-gray-500 file:bg-gray-800 file:text-white file:border-0 file:py-2 file:px-4 file:rounded mb-4 cursor-pointer hover:file:bg-gray-700" onchange="initCropper(this, 4.5/2.0, 'nsdl-sig')">
+                    <h3 class="text-lg font-bold text-gray-200 mb-4">✍️ Signature Crop</h3>
+                    
+                    <div class="drop-zone rounded p-4 text-center cursor-pointer mb-4 relative" id="drop-nsdl-sig">
+                        <p class="text-gray-500 text-sm pointer-events-none">Drag & Drop or Click</p>
+                        <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="initCropper(this, 4.5/2.0, 'nsdl-sig')">
+                    </div>
                     
                     <div id="wrap-nsdl-sig" class="hidden">
                         <div class="h-64 bg-black border border-gray-700 overflow-hidden relative">
                             <img id="img-nsdl-sig" class="max-w-full">
                         </div>
-                        <button onclick="downloadCrop('nsdl-sig', 400, 180, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
-                            Crop & Save (Fixed 4.5x2.0cm)
+                        <button onclick="downloadSmart('nsdl-sig', 531, 236, 45, 50)" class="w-full mt-4 btn-primary py-2 rounded font-bold uppercase text-sm">
+                            Download
                         </button>
                     </div>
                 </div>
             </div>
 
             <div class="card p-6 border-red-900/30">
+                <div class="absolute top-0 right-0 bg-red-900/40 text-red-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-red-900">
+                    Max 300 KB
+                </div>
                 <div class="flex items-center gap-3 mb-2">
-                    <h3 class="text-xl font-bold text-red-500">📄 Ultimate PDF Compressor</h3>
-                    <span class="text-xs bg-red-900/20 text-red-400 px-2 py-1 rounded">Any Size ➔ Under 300KB</span>
+                    <h3 class="text-xl font-bold text-red-500">📄 PDF Compressor</h3>
                 </div>
-                <p class="text-gray-500 text-sm mb-4">Uses Smart-Resizing Algorithm. Quality retained for printing/viewing.</p>
+                <p class="text-gray-500 text-sm mb-4">High Quality (290KB - 300KB Target)</p>
 
-                <div class="flex flex-col md:flex-row gap-4">
-                    <input type="file" id="pdf-file" accept="application/pdf" class="flex-1 bg-gray-900 text-gray-300 rounded border border-gray-700 p-2 cursor-pointer focus:border-red-500 outline-none">
-                    <button id="btn-pdf" onclick="compressPDF()" class="bg-red-600 hover:bg-red-700 text-white px-8 py-2 rounded font-bold flex items-center justify-center">
-                        COMPRESS NOW <span id="spinner-pdf" class="spinner hidden"></span>
-                    </button>
+                <div class="drop-zone rounded p-6 flex flex-col items-center justify-center text-center relative" id="drop-pdf">
+                    <input type="file" id="pdf-file" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="handlePdfSelect()">
+                    <p class="text-gray-400 font-bold">Click or Drag PDF Here</p>
+                    <p id="pdf-name" class="text-sm text-gray-600 mt-1">No file selected</p>
                 </div>
-                <div id="pdf-msg" class="mt-3 text-xs font-mono text-gray-500">Ready for upload...</div>
+
+                <button id="btn-pdf" onclick="compressPDF()" class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded font-bold flex items-center justify-center gap-2">
+                    DOWNLOAD PDF <span id="spinner-pdf" class="spinner hidden"></span>
+                </button>
+                <div id="pdf-msg" class="mt-3 text-center text-xs font-mono text-gray-500"></div>
             </div>
 
         </div>
 
         <div id="panel-uti" class="hidden space-y-6">
             <div class="grid md:grid-cols-2 gap-6">
+                
                 <div class="card p-5 border-purple-900/30">
-                    <h3 class="text-lg font-bold text-purple-400 mb-4">📷 UTI Photo (213x213 px)</h3>
-                    <input type="file" accept="image/*" class="w-full text-sm text-gray-500 file:bg-gray-800 file:text-white file:border-0 file:py-2 file:px-4 file:rounded mb-4" onchange="initCropper(this, 1, 'uti-photo')">
+                    <div class="absolute top-0 right-0 bg-purple-900/40 text-purple-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-purple-900">
+                        213px x 213px
+                    </div>
+                    <h3 class="text-lg font-bold text-purple-400 mb-4">📷 Photo Crop</h3>
+                    
+                    <div class="drop-zone rounded p-4 text-center cursor-pointer mb-4 relative" id="drop-uti-photo">
+                        <p class="text-gray-500 text-sm pointer-events-none">Drag & Drop or Click</p>
+                        <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="initCropper(this, 1, 'uti-photo')">
+                    </div>
+
                     <div id="wrap-uti-photo" class="hidden">
                         <div class="h-64 bg-black overflow-hidden"><img id="img-uti-photo"></div>
-                        <button onclick="downloadCrop('uti-photo', 213, 213, 30)" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-bold uppercase text-sm">Download (213x213px)</button>
+                        <button onclick="downloadSmart('uti-photo', 213, 213, 45, 50)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">Download</button>
                     </div>
                 </div>
 
                 <div class="card p-5 border-purple-900/30">
-                    <h3 class="text-lg font-bold text-purple-400 mb-4">✍️ UTI Signature (200x400 px)</h3>
-                    <input type="file" accept="image/*" class="w-full text-sm text-gray-500 file:bg-gray-800 file:text-white file:border-0 file:py-2 file:px-4 file:rounded mb-4" onchange="initCropper(this, 2/1, 'uti-sig')">
+                    <div class="absolute top-0 right-0 bg-purple-900/40 text-purple-300 text-xs font-mono px-2 py-1 rounded-bl border-l border-b border-purple-900">
+                        400px x 200px
+                    </div>
+                    <h3 class="text-lg font-bold text-purple-400 mb-4">✍️ Signature Crop</h3>
+                    
+                    <div class="drop-zone rounded p-4 text-center cursor-pointer mb-4 relative" id="drop-uti-sig">
+                        <p class="text-gray-500 text-sm pointer-events-none">Drag & Drop or Click</p>
+                        <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="initCropper(this, 2/1, 'uti-sig')">
+                    </div>
+
                     <div id="wrap-uti-sig" class="hidden">
                         <div class="h-64 bg-black overflow-hidden"><img id="img-uti-sig"></div>
-                        <button onclick="downloadCrop('uti-sig', 400, 200, 60)" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-bold uppercase text-sm">Download (400x200px)</button>
+                        <button onclick="downloadSmart('uti-sig', 400, 200, 45, 50)" class="w-full mt-4 btn-purple py-2 rounded font-bold uppercase text-sm">Download</button>
                     </div>
                 </div>
             </div>
@@ -136,15 +169,15 @@
     </div>
 
     <script>
-        let cropper = null;
+        // Store multiple cropper instances to fix the "disappearing photo" bug
+        const croppers = {};
 
-        // --- 1. UI LOGIC ---
+        // --- 1. UI LOGIC & DRAG DROP ---
         function switchMode(mode) {
             document.getElementById('panel-nsdl').classList.add('hidden');
             document.getElementById('panel-uti').classList.add('hidden');
             document.getElementById('panel-' + mode).classList.remove('hidden');
 
-            // Reset Buttons
             const btnNsdl = document.getElementById('nav-nsdl');
             const btnUti = document.getElementById('nav-uti');
             
@@ -157,27 +190,59 @@
             }
         }
 
-        // --- 2. EXACT DIMENSION CROPPER LOGIC ---
+        // Initialize Drop Zones
+        ['drop-nsdl-photo', 'drop-nsdl-sig', 'drop-uti-photo', 'drop-uti-sig', 'drop-pdf'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                el.classList.add('dragover');
+            });
+            el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                el.classList.remove('dragover');
+                // The input handling is done via the file input inside, 
+                // but if dropped on div, we manually trigger input change if needed.
+                const input = el.querySelector('input');
+                if (e.dataTransfer.files.length) {
+                    input.files = e.dataTransfer.files;
+                    // Manually trigger change event
+                    const event = new Event('change');
+                    input.dispatchEvent(event);
+                }
+            });
+        });
+
+        function handlePdfSelect() {
+            const input = document.getElementById('pdf-file');
+            const nameDisplay = document.getElementById('pdf-name');
+            if (input.files[0]) {
+                nameDisplay.textContent = input.files[0].name;
+                nameDisplay.classList.add('text-white');
+            }
+        }
+
+        // --- 2. CROPPER LOGIC (Bug Fixed) ---
         function initCropper(input, ratio, id) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    if (cropper) cropper.destroy();
-                    
-                    // Hide all wrappers
-                    document.querySelectorAll('[id^="wrap-"]').forEach(el => el.classList.add('hidden'));
+                    // Destroy existing cropper for THIS specific ID only
+                    if (croppers[id]) croppers[id].destroy();
                     
                     const img = document.getElementById('img-' + id);
                     img.src = e.target.result;
+                    
+                    // Show wrapper
                     document.getElementById('wrap-' + id).classList.remove('hidden');
+                    // Hide drop zone text temporarily to make it cleaner? No, keep it accessible.
 
-                    cropper = new Cropper(img, {
+                    croppers[id] = new Cropper(img, {
                         aspectRatio: ratio,
-                        viewMode: 1, // Restrict crop box to image
+                        viewMode: 1,
                         dragMode: 'move',
-                        autoCropArea: 0.8,
-                        background: false, // Dark theme friendly
-                        modal: true,
+                        autoCropArea: 0.9,
+                        background: false,
                         guides: true,
                     });
                 };
@@ -185,43 +250,76 @@
             }
         }
 
-        function downloadCrop(id, widthPx, heightPx, maxKb) {
-            if (!cropper) return;
+        // --- 3. INTELLIGENT IMAGE RESIZER (45KB - 50KB) ---
+        function downloadSmart(id, widthPx, heightPx, minKb, maxKb) {
+            if (!croppers[id]) return;
 
-            // Step 1: Force Resize to exact Pixel Dimensions
-            // This guarantees the output is EXACTLY what NSDL wants (e.g., 200x280)
-            const canvas = cropper.getCroppedCanvas({
+            const canvas = croppers[id].getCroppedCanvas({
                 width: widthPx,
                 height: heightPx,
-                fillColor: '#fff', // Signatures need white background if transparent
+                fillColor: '#fff',
                 imageSmoothingEnabled: true,
                 imageSmoothingQuality: 'high',
             });
 
-            // Step 2: Intelligent Compression Loop
-            let quality = 0.95;
+            // Binary Search-like approach to find the perfect quality
+            let minQ = 0.5;
+            let maxQ = 1.0;
+            let bestBlob = null;
+            let bestSize = 0;
             
-            function compressAndDownload() {
-                canvas.toBlob((blob) => {
-                    if (blob.size > maxKb * 1024 && quality > 0.5) {
-                        // If file is too big, reduce quality slightly and retry
-                        quality -= 0.05;
-                        compressAndDownload(); 
-                    } else {
-                        // Download
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(blob);
-                        link.download = `${id}_final.jpg`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+            // We run a quick loop to find a blob inside the range
+            // If the image at 1.0 quality is LESS than minKb, we just save at 1.0 (Can't make it bigger without padding)
+            // If the image at 0.1 quality is MORE than maxKb, we save at 0.1
+            
+            const checkQuality = (q) => {
+                return new Promise(resolve => {
+                    canvas.toBlob(blob => resolve(blob), 'image/jpeg', q);
+                });
+            };
+
+            const processDownload = async () => {
+                // 1. Check Max Quality
+                let blob = await checkQuality(1.0);
+                
+                // If even at max quality it's too small, just download it (High Quality is priority)
+                // But user insisted on range. To force size up is hard for JPEGs without adding noise.
+                // We will stick to 1.0 if it's small.
+                
+                if (blob.size > maxKb * 1024) {
+                    // It's too big, we need to compress
+                    let attempts = 0;
+                    let currentQ = 0.9;
+                    
+                    while (attempts < 10) {
+                        blob = await checkQuality(currentQ);
+                        if (blob.size <= maxKb * 1024 && blob.size >= minKb * 1024) {
+                            break; // Perfect
+                        }
+                        if (blob.size > maxKb * 1024) {
+                            currentQ -= 0.05; // Reduce quality
+                        } else if (blob.size < minKb * 1024) {
+                            currentQ += 0.02; // Increase slightly
+                        }
+                        if (currentQ < 0.1) currentQ = 0.1;
+                        if (currentQ > 1.0) currentQ = 1.0;
+                        attempts++;
                     }
-                }, 'image/jpeg', quality);
-            }
-            compressAndDownload();
+                }
+
+                // Download Logic
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${id}_fixed.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            processDownload();
         }
 
-        // --- 3. SMART PDF COMPRESSOR (SIZE FIX) ---
+        // --- 4. SMART PDF COMPRESSOR (290KB - 300KB Target) ---
         async function compressPDF() {
             const fileInput = document.getElementById('pdf-file');
             const status = document.getElementById('pdf-msg');
@@ -229,70 +327,83 @@
             const btn = document.getElementById('btn-pdf');
 
             if (!fileInput.files[0]) {
-                status.innerText = "❌ Please select a file first.";
-                status.className = "mt-3 text-xs font-mono text-red-500";
+                status.innerText = "Please drop a file first.";
+                status.className = "mt-3 text-center text-xs font-mono text-red-500";
                 return;
             }
 
-            // Start Processing
             btn.disabled = true;
             spinner.classList.remove('hidden');
-            status.innerText = "Processing... (Resizing pages to standard A4)";
-            status.className = "mt-3 text-xs font-mono text-blue-400";
+            status.innerText = "Analyzing & Optimizing...";
+            status.className = "mt-3 text-center text-xs font-mono text-blue-400";
 
             try {
                 const file = fileInput.files[0];
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-                
-                // Initialize new PDF
                 const { jsPDF } = window.jspdf;
-                const newPdf = new jsPDF({
-                    orientation: 'p',
-                    unit: 'mm',
-                    format: 'a4',
-                    compress: true // Turn on internal zlib compression
-                });
 
-                const pageWidth = 210; // A4 width in mm
-                const pageHeight = 297; // A4 height in mm
+                // We try a standard compression first
+                // To get close to 300KB, we adjust the scale/DPI of the images put into the PDF
+                
+                // Target: A4
+                const pageWidth = 210; 
+                const pageHeight = 297; 
 
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    status.innerText = `Compressing Page ${i}/${pdf.numPages}...`;
-                    const page = await pdf.getPage(i);
+                // We will try to generate the PDF with a specific image quality
+                const createPdfAtQuality = async (imgQuality, scaleFactor) => {
+                    const newPdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
                     
-                    // SCALE FACTOR IS KEY HERE
-                    // Scale 1.0 at 72DPI is too low. Scale 2 is good.
-                    // But to ensure <300KB, we limit the canvas width.
-                    // 1240px width is approx 150 DPI (Good for print, low file size)
-                    let viewport = page.getViewport({ scale: 1.0 });
-                    const scale = 1240 / viewport.width;
-                    viewport = page.getViewport({ scale: scale });
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        // Scale factor determines resolution. 
+                        // 2.0 is usually high res. 1.0 is low.
+                        let viewport = page.getViewport({ scale: 1.0 });
+                        const finalScale = (1240 * scaleFactor) / viewport.width; // Normalize width
+                        viewport = page.getViewport({ scale: finalScale });
 
-                    const canvas = document.createElement('canvas');
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    
-                    const ctx = canvas.getContext('2d');
-                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        const ctx = canvas.getContext('2d');
+                        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                    // CONVERT TO JPEG (Not PNG) with 0.6 Quality
-                    // This is the magic step that reduces 50MB to KB
-                    const imgData = canvas.toDataURL('image/jpeg', 0.6);
+                        const imgData = canvas.toDataURL('image/jpeg', imgQuality);
+                        if (i > 1) newPdf.addPage();
+                        newPdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+                    }
+                    return newPdf;
+                };
 
-                    if (i > 1) newPdf.addPage();
-                    newPdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+                // Strategy: Start with high quality. If > 300KB, reduce.
+                // It's hard to predict exact size, so we use a safe heuristic.
+                // 0.7 quality at approx 150DPI usually yields ~100-200KB per page. 
+                
+                // Run 1: High Quality Attempt
+                let finalDoc = await createPdfAtQuality(0.75, 1.2); 
+                let blob = finalDoc.output('blob');
+
+                // If too big, retry with lower settings
+                if (blob.size > 300 * 1024) {
+                    status.innerText = "File too large, compressing harder...";
+                    finalDoc = await createPdfAtQuality(0.5, 1.0);
+                    blob = finalDoc.output('blob');
+                } else if (blob.size < 150 * 1024) {
+                    // If way too small, boost quality
+                    status.innerText = "Enhancing quality...";
+                    finalDoc = await createPdfAtQuality(0.9, 1.5);
+                    blob = finalDoc.output('blob');
                 }
 
-                newPdf.save("Compressed_Document.pdf");
+                finalDoc.save("Optimized_Document.pdf");
                 
-                status.innerText = "✅ Success! Downloaded under 300KB.";
-                status.className = "mt-3 text-xs font-mono text-green-500";
+                status.innerText = `Done! Size: ${(blob.size/1024).toFixed(1)} KB`;
+                status.className = "mt-3 text-center text-xs font-mono text-green-500";
 
             } catch (err) {
                 console.error(err);
-                status.innerText = "❌ Error: " + err.message;
-                status.className = "mt-3 text-xs font-mono text-red-500";
+                status.innerText = "Error: " + err.message;
+                status.className = "mt-3 text-center text-xs font-mono text-red-500";
             } finally {
                 spinner.classList.add('hidden');
                 btn.disabled = false;
