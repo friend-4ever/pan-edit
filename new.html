@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTI PAN Crop Tool | ZEXON PC</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b, #000000);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* Glassmorphism Design */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
+            width: 100%;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .card h2 {
+            color: #fff;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .specs {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 3px solid #3b82f6;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed #475569;
+            border-radius: 10px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        input[type="file"]:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .preview-box {
+            margin-top: 20px;
+            text-align: center;
+        }
+        canvas {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .footer {
+            margin-top: 50px;
+            color: #64748b;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .footer span {
+            color: #8b5cf6;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>UTI PAN Tool</h1>
+        <p class="subtitle">Photo & Signature Cropper by ZEXON PC</p>
+    </div>
+
+    <div class="container">
+        <!-- Photo Tool -->
+        <div class="card">
+            <h2>📸 Photo Resize</h2>
+            <div class="specs">
+                <strong>UTI Specs:</strong> 213x213 Pixels | 300 DPI<br>
+                Output format: JPEG
+            </div>
+            <div class="form-group">
+                <label>Upload Passport Photo</label>
+                <input type="file" id="photoInput" accept="image/*">
+            </div>
+            <button class="btn" onclick="processImage('photoInput', 213, 213, 'photoCanvas', 'UTI_Photo_213x213.jpg')">Crop & Download Photo</button>
+            <div class="preview-box">
+                <canvas id="photoCanvas" style="display:none;"></canvas>
+            </div>
+        </div>
+
+        <!-- Signature Tool -->
+        <div class="card">
+            <h2>✍️ Signature Resize</h2>
+            <div class="specs">
+                <strong>UTI Specs:</strong> 400x200 Pixels | 600 DPI<br>
+                Output format: JPEG
+            </div>
+            <div class="form-group">
+                <label>Upload Signature Scan</label>
+                <input type="file" id="sigInput" accept="image/*">
+            </div>
+            <button class="btn" onclick="processImage('sigInput', 400, 200, 'sigCanvas', 'UTI_Signature_400x200.jpg')">Crop & Download Signature</button>
+            <div class="preview-box">
+                <canvas id="sigCanvas" style="display:none;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 Developed by <span>ZEXON PC</span> (Maxado Creative Lab)
+    </div>
+
+    <script>
+        function processImage(inputId, width, height, canvasId, fileName) {
+            const input = document.getElementById(inputId);
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+
+            if (!input.files || !input.files[0]) {
+                alert("Bhai, pehle image upload kar lo!");
+                return;
+            }
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // Set exact UTI dimensions
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.style.display = 'inline';
+
+                    // Fill with white background to handle PNG transparencies
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(0, 0, width, height);
+
+                    // Resize and draw the image
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Export as compressed JPG to ensure size is below UTI limit (30KB / 60KB)
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    
+                    // Create automatic download link
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
